@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mytheria - Logs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: black;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* Background Video */
+        .video-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        /* Bottom Blur Overlay */
+        .blur-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(60px);
+            -webkit-backdrop-filter: blur(60px);
+            mask-image: linear-gradient(to top, black 0%, transparent 45%);
+            -webkit-mask-image: linear-gradient(to top, black 0%, transparent 45%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Liquid Glass Class */
+        .liquid-glass {
+            background: rgba(255, 255, 255, 0.01);
+            background-blend-mode: luminosity;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: none;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .liquid-glass::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1.4px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        /* Blur Fade Up Animation */
+        @keyframes blurFadeUp {
+            from {
+                opacity: 0;
+                filter: blur(20px);
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                filter: blur(0);
+                transform: translateY(0);
+            }
+        }
+
+        .animate-blur-fade-up {
+            animation: blurFadeUp 1s ease-out forwards;
+            opacity: 0;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem 1.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .navbar {
+                padding: 1.5rem 2rem 1.5rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .navbar {
+                padding: 2rem 3rem 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .navbar {
+                padding: 2.5rem 4.5rem 1.5rem;
+            }
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            height: 2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        @media (min-width: 640px) {
+            .logo {
+                height: 2.5rem;
+            }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+
+        @media (max-width: 1023px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        .nav-links a {
+            font-size: 0.875rem;
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #5ed29c;
+        }
+
+        /* Content */
+        .content {
+            position: relative;
+            z-index: 10;
+            padding: 100px 1rem 2rem;
+            min-height: 100vh;
+        }
+
+        @media (min-width: 640px) {
+            .content {
+                padding: 100px 1.5rem 2rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .content {
+                padding: 100px 3rem 4rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .content {
+                padding: 100px 4.5rem 4rem;
+            }
+        }
+
+        .content h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 640px) {
+            .content h1 {
+                font-size: 3rem;
+            }
+        }
+
+        /* Logs Grid */
+        .logs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Log Card */
+        .log-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .log-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+        }
+
+        .log-card .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .log-card .username {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .log-card .hostname {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .log-card .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .log-card .status.active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+
+        .log-card .status.inactive {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .log-card .server {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 0.5rem;
+        }
+
+        .log-card .hwid {
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 1rem;
+            word-break: break-all;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .modal .modal-header {
+            margin-bottom: 2rem;
+        }
+
+        .modal .modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .modal .info-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal .info-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal .info-section .info-value {
+            font-size: 1.125rem;
+            color: white;
+        }
+
+        .modal .scoreboard-section {
+            margin-top: 1.5rem;
+        }
+
+        .modal .scoreboard-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal .scoreboard-section .scoreboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal .scoreboard-section .scoreboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .modal .scoreboard-section .scoreboard-label {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .modal .scoreboard-section .scoreboard-value {
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Chat Section */
+        .chat-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-section .input-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .chat-section input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .chat-section input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .chat-section .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .chat-section .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .chat-section .btn-danger {
+            background: #f093fb;
+            color: white;
+        }
+
+        .chat-section .btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Video -->
+    <video class="video-bg" autoplay muted loop playsinline>
+        <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4" type="video/mp4">
+    </video>
+
+    <!-- Bottom Blur Overlay -->
+    <div class="blur-overlay"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <div class="logo liquid-glass animate-blur-fade-up" style="animation-delay: 0ms; padding: 0.5rem 1rem; border-radius: 9999px;">
+                <span style="font-weight: 700; font-size: 1.5rem; line-height: 1;">Mytheria</span>
+            </div>
+        </div>
+        <ul class="nav-links animate-blur-fade-up">
+            <li><a href="index.html" style="animation-delay: 100ms;">Home</a></li>
+            <li><a href="#" style="animation-delay: 150ms;">Logs</a></li>
+        </ul>
+    </nav>
+
+    <!-- Content -->
+    <div class="content">
+        <h1 class="animate-blur-fade-up" style="animation-delay: 200ms;">User Logs</h1>
+        <div class="logs-grid" id="logsGrid">
+            <div class="loading animate-blur-fade-up" style="animation-delay: 300ms;">Loading logs...</div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <button class="close-btn" onclick="closeModal()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <div class="modal-header">
+                <h2 id="modalUsername">Username</h2>
+            </div>
+            <div class="info-section">
+                <h3>Computer Info</h3>
+                <div class="info-value" id="modalHostname">Hostname</div>
+                <div class="info-value" id="modalHwid">HWID</div>
+            </div>
+            <div class="info-section">
+                <h3>Status</h3>
+                <div class="status" id="modalStatus">Active</div>
+                <div class="server" id="modalServer">Server: -</div>
+            </div>
+            <div class="scoreboard-section">
+                <h3>Scoreboard</h3>
+                <div id="modalScoreboard"></div>
+            </div>
+            <div class="chat-section">
+                <h3>Send Message</h3>
+                <div class="input-group">
+                    <input type="text" id="chatInput" placeholder="Enter message...">
+                    <button class="btn btn-primary" onclick="sendChat()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                        Send
+                    </button>
+                </div>
+                <button class="btn btn-danger" onclick="sendCrash()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                        <line x1="12" y1="2" x2="12" y2="12"></line>
+                        <line x1="12" y1="12" x2="12" y2="22"></line>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <line x1="2" y1="12" x2="12" y2="2"></line>
+                        <line x1="2" y1="12" x2="12" y2="22"></line>
+                        <line x1="22" y1="12" x2="12" y2="2"></line>
+                        <line x1="22" y1="12" x2="12" y2="22"></line>
+                    </svg>
+                    Crash Client
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load logs
+        async function loadLogs() {
+            try {
+                const response = await fetch('/logs');
+                const data = await response.json();
+                
+                const grid = document.getElementById('logsGrid');
+                
+                if (data.logs.length === 0) {
+                    grid.innerHTML = '<div class="loading animate-blur-fade-up" style="animation-delay: 300ms;">No logs found</div>';
+                    return;
+                }
+                
+                grid.innerHTML = data.logs.map((log, index) => `
+                    <div class="log-card animate-blur-fade-up" style="animation-delay: ${300 + index * 50}ms;" onclick="openModal(${index})">
+                        <div class="card-header">
+                            <div class="username">${log.username}</div>
+                            <div class="hostname">${log.hostname}</div>
+                        </div>
+                        <div class="status ${log.isActive ? 'active' : 'inactive'}">
+                            ${log.isActive ? 'Active' : 'Inactive'}
+                        </div>
+                        <div class="server">Server: ${log.server || '-'}</div>
+                        <div class="hwid">HWID: ${log.hwid}</div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                document.getElementById('logsGrid').innerHTML = 
+                    '<div class="loading animate-blur-fade-up" style="animation-delay: 300ms;">Failed to load logs</div>';
+            }
+        }
+
+        // Open modal
+        let currentLog = null;
+
+        function openModal(index) {
+            const modal = document.getElementById('modalOverlay');
+            const logs = JSON.parse(localStorage.getItem('logs') || '[]');
+            
+            if (logs.length > 0 && logs[index]) {
+                currentLog = logs[index];
+                
+                document.getElementById('modalUsername').textContent = currentLog.username;
+                document.getElementById('modalHostname').textContent = currentLog.hostname;
+                document.getElementById('modalHwid').textContent = currentLog.hwid;
+                
+                const statusEl = document.getElementById('modalStatus');
+                statusEl.textContent = currentLog.isActive ? 'Active' : 'Inactive';
+                statusEl.className = `status ${currentLog.isActive ? 'active' : 'inactive'}`;
+                
+                document.getElementById('modalServer').textContent = `Server: ${currentLog.server || '-'}`;
+                
+                // Render scoreboard
+                const scoreboardEl = document.getElementById('modalScoreboard');
+                if (currentLog.scoreboard && Object.keys(currentLog.scoreboard).length > 0) {
+                    scoreboardEl.innerHTML = Object.entries(currentLog.scoreboard).map(([key, value]) => `
+                        <div class="scoreboard-item">
+                            <span class="scoreboard-label">${key}</span>
+                            <span class="scoreboard-value">${value}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    scoreboardEl.innerHTML = '<p style="color: rgba(255,255,255,0.5);">No scoreboard data</p>';
+                }
+                
+                modal.classList.add('open');
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('open');
+            currentLog = null;
+        }
+
+        // Send chat message
+        async function sendChat() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message || !currentLog) {
+                alert('Please enter a message');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        username: currentLog.username,
+                        message: message 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Message sent!');
+                    input.value = '';
+                } else {
+                    alert(`Error: ${data.error}`);
+                }
+            } catch (err) {
+                alert(`Connection error: ${err.message}`);
+            }
+        }
+
+        // Send crash command
+        async function sendCrash() {
+            if (!currentLog) {
+                alert('No user selected');
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to crash ${currentLog.username}'s client?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/crash', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentLog.username })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Crash command sent!');
+                } else {
+                    alert(`Error: ${data.error}`);
+                }
+            } catch (err) {
+                alert(`Connection error: ${err.message}`);
+            }
+        }
+
+        // Close modal on outside click
+        document.getElementById('modalOverlay').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('modalOverlay')) {
+                closeModal();
+            }
+        });
+
+        // Initialize
+        loadLogs();
+        setInterval(loadLogs, 5000); // Auto-refresh every 5 seconds
+    </script>
+</body>
+</html>

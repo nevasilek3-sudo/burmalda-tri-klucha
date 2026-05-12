@@ -99,7 +99,7 @@
             width: 100%;
             z-index: 50;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
             padding: 1rem 1.5rem 1.5rem;
         }
@@ -124,13 +124,14 @@
 
         .logo-container {
             display: flex;
-            flex-direction: column;
             align-items: center;
             gap: 1rem;
         }
 
         .logo {
             height: 2rem;
+            display: flex;
+            align-items: center;
         }
 
         @media (min-width: 640px) {
@@ -159,7 +160,12 @@
         }
 
         .nav-links a:hover {
-            color: #d1d5db;
+            color: #5ed29c;
+        }
+
+        .nav-links a.active {
+            color: #5ed29c;
+            font-weight: 600;
         }
 
         .nav-buttons {
@@ -481,9 +487,13 @@
     <nav class="navbar">
         <div class="logo-container">
             <div class="logo liquid-glass animate-blur-fade-up" style="animation-delay: 0ms; padding: 0.5rem 1rem; border-radius: 9999px;">
-                <span style="font-weight: 700; font-size: 1.5rem;">Mytheria</span>
+                <span style="font-weight: 700; font-size: 1.5rem; line-height: 1;">Mytheria</span>
             </div>
         </div>
+        <ul class="nav-links animate-blur-fade-up">
+            <li><a href="#" style="animation-delay: 100ms;">Home</a></li>
+            <li><a href="logs.html" style="animation-delay: 150ms;">Logs</a></li>
+        </ul>
     </nav>
 
     <!-- Hero Content -->

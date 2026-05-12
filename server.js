@@ -12,6 +12,7 @@ app.use(express.static('public'));
 
 // Data storage
 const KEYS_FILE = path.join(__dirname, 'keys.json');
+const LOGS_DIR = path.join(__dirname, 'logs');
 const ACTIVE_KEYS = loadKeys();
 
 // Load keys from file
@@ -44,11 +45,6 @@ function generateKey() {
     return key;
 }
 
-// Check if a key is valid
-function isValidKey(key) {
-    return ACTIVE_KEYS.some(k => k.key === key && !k.deleted);
-}
-
 // Get remaining time for active broadcast
 let activeBroadcast = null;
 let broadcastEndTime = 0;
@@ -61,7 +57,6 @@ app.post('/broadcast', (req, res) => {
         return res.status(400).json({ error: 'Invalid duration' });
     }
 
-    // Set active broadcast
     broadcastEndTime = Date.now() + duration;
     activeBroadcast = {
         duration: duration,
@@ -164,12 +159,113 @@ app.get('/health', (req, res) => {
     });
 });
 
+// Logs endpoints
+app.get('/logs', (req, res) => {
+    try {
+        if (!fs.existsSync(LOGS_DIR)) {
+            fs.mkdirSync(LOGS_DIR, { recursive: true });
+        }
+        
+        const files = fs.readdirSync(LOGS_DIR).filter(f => f.endsWith('.json'));
+        const logs = files.map(file => {
+            try {
+                const data = fs.readFileSync(path.join(LOGS_DIR, file), 'utf8');
+                return JSON.parse(data);
+            } catch (err) {
+                return null;
+            }
+        }).filter(log => log !== null);
+        
+        res.json({ 
+            success: true, 
+            logs: logs,
+            count: logs.length
+        });
+    } catch (err) {
+        res.status(500).json({ 
+            success: false, 
+            error: 'Failed to read logs' 
+        });
+    }
+});
+
+app.post('/logs', (req, res) => {
+    const { username, hostname, hwid, isActive, server, scoreboard, message } = req.body;
+    
+    if (!username || !hostname || !hwid) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    try {
+        if (!fs.existsSync(LOGS_DIR)) {
+            fs.mkdirSync(LOGS_DIR, { recursive: true });
+        }
+        
+        const logData = {
+            username: username,
+            hostname: hostname,
+            hwid: hwid,
+            isActive: isActive,
+            server: server,
+            scoreboard: scoreboard,
+            message: message,
+            timestamp: Date.now()
+        };
+        
+        const filename = `${username}_${Date.now()}.json`;
+        fs.writeFileSync(path.join(LOGS_DIR, filename), JSON.stringify(logData, null, 2));
+        
+        console.log(`Saved log for user: ${username}`);
+        
+        res.json({ 
+            success: true, 
+            message: 'Log saved successfully',
+            log: logData
+        });
+    } catch (err) {
+        res.status(500).json({ 
+            success: false, 
+            error: 'Failed to save log' 
+        });
+    }
+});
+
+app.post('/chat', (req, res) => {
+    const { username, message } = req.body;
+    
+    if (!username || !message) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    console.log(`Sending chat message to ${username}: ${message}`);
+    
+    res.json({ 
+        success: true, 
+        message: 'Chat message sent' 
+    });
+});
+
+app.post('/crash', (req, res) => {
+    const { username } = req.body;
+    
+    if (!username) {
+        return res.status(400).json({ error: 'Username is required' });
+    }
+    
+    console.log(`Crash command sent to ${username}`);
+    
+    res.json({ 
+        success: true, 
+        message: 'Crash command sent' 
+    });
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log(`Ovosh Server running on port ${PORT}`);
     console.log(`Active keys loaded: ${ACTIVE_KEYS.length}`);
-    console.log(`Keys file: ${KEYS_FILE}`);
+    console.log(`Logs directory: ${LOGS_DIR}`);
 });
 
 // Export for testing
-module.exports = { app, ACTIVE_KEYS, generateKey, isValidKey };
+module.exports = { app, ACTIVE_KEYS, generateKey };
