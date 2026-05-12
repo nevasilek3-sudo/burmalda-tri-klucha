@@ -534,32 +534,67 @@
     </div>
 
     <script>
+        // Store logs in memory
+        let logsData = [];
+
         // Load logs
         async function loadLogs() {
             try {
                 const response = await fetch('/logs');
                 const data = await response.json();
                 
-                const grid = document.getElementById('logsGrid');
-                
-                if (data.logs.length === 0) {
-                    grid.innerHTML = '<div class="loading animate-blur-fade-up" style="animation-delay: 300ms;">No logs found</div>';
+                if (!data.logs || data.logs.length === 0) {
+                    document.getElementById('logsGrid').innerHTML = 
+                        '<div class="loading animate-blur-fade-up" style="animation-delay: 300ms;">No logs found</div>';
+                    logsData = [];
                     return;
                 }
                 
-                grid.innerHTML = data.logs.map((log, index) => `
-                    <div class="log-card animate-blur-fade-up" style="animation-delay: ${300 + index * 50}ms;" onclick="openModal(${index})">
-                        <div class="card-header">
-                            <div class="username">${log.username}</div>
-                            <div class="hostname">${log.hostname}</div>
-                        </div>
-                        <div class="status ${log.isActive ? 'active' : 'inactive'}">
-                            ${log.isActive ? 'Active' : 'Inactive'}
-                        </div>
-                        <div class="server">Server: ${log.server || '-'}</div>
-                        <div class="hwid">HWID: ${log.hwid}</div>
-                    </div>
-                `).join('');
+                // Update logsData
+                logsData = data.logs;
+                
+                const grid = document.getElementById('logsGrid');
+                
+                // Create map of existing cards by username
+                const existingCards = {};
+                grid.querySelectorAll('.log-card').forEach(card => {
+                    const username = card.dataset.username;
+                    if (username) existingCards[username] = card;
+                });
+                
+                // Build new HTML
+                let newHtml = '';
+                data.logs.forEach((log, index) => {
+                    if (existingCards[log.username]) {
+                        // Update existing card
+                        const card = existingCards[log.username];
+                        card.querySelector('.status').textContent = log.isActive ? 'Active' : 'Inactive';
+                        card.querySelector('.status').className = `status ${log.isActive ? 'active' : 'inactive'}`;
+                        card.querySelector('.server').textContent = `Server: ${log.server || '-'}`;
+                        card.querySelector('.hostname').textContent = log.hostname;
+                    } else {
+                        // Create new card
+                        newHtml += `
+                            <div class="log-card animate-blur-fade-up" style="animation-delay: ${300 + index * 50}ms;" 
+                                 data-username="${log.username}" onclick="openModal('${log.username}')">
+                                <div class="card-header">
+                                    <div class="username">${log.username}</div>
+                                    <div class="hostname">${log.hostname}</div>
+                                </div>
+                                <div class="status ${log.isActive ? 'active' : 'inactive'}">
+                                    ${log.isActive ? 'Active' : 'Inactive'}
+                                </div>
+                                <div class="server">Server: ${log.server || '-'}</div>
+                                <div class="hwid">HWID: ${log.hwid}</div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                // Append new cards
+                if (newHtml) {
+                    grid.innerHTML += newHtml;
+                }
             } catch (err) {
                 document.getElementById('logsGrid').innerHTML = 
                     '<div class="loading animate-blur-fade-up" style="animation-delay: 300ms;">Failed to load logs</div>';
@@ -569,12 +604,14 @@
         // Open modal
         let currentLog = null;
 
-        function openModal(index) {
+        function openModal(username) {
             const modal = document.getElementById('modalOverlay');
-            const logs = JSON.parse(localStorage.getItem('logs') || '[]');
             
-            if (logs.length > 0 && logs[index]) {
-                currentLog = logs[index];
+            // Find log by username
+            const log = logsData.find(l => l.username === username);
+            
+            if (log) {
+                currentLog = log;
                 
                 document.getElementById('modalUsername').textContent = currentLog.username;
                 document.getElementById('modalHostname').textContent = currentLog.hostname;
@@ -600,6 +637,8 @@
                 }
                 
                 modal.classList.add('open');
+            } else {
+                alert('User not found');
             }
         }
 
