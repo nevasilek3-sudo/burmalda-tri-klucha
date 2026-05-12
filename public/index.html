@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ovosh Server Control Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .key-list {
+            list-style: none;
+        }
+
+        .key-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .key-item .key-text {
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            color: #333;
+        }
+
+        .key-item .key-meta {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .status {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .status.active {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .status.inactive {
+            background: #e9ecef;
+            color: #6c757d;
+        }
+
+        .broadcast-info {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .broadcast-info h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .broadcast-info .timer {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>>Ovosh Server Control Panel</h1>
+
+        <div class="card">
+            <h2>Server Status</h2>
+            <div id="serverStatus" class="status inactive">
+                Server is offline
+            </div>
+            <div id="broadcastInfo" class="broadcast-info hidden">
+                <h3>Active Broadcast</h3>
+                <div class="timer" id="broadcastTimer">00:00</div>
+                <p id="broadcastDuration">Duration: 10 seconds</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Generate New Key</h2>
+            <div id="generateMessage" class="message hidden"></div>
+            <div class="form-group">
+                <label>Key Name (optional)</label>
+                <input type="text" id="keyName" placeholder="Enter key name (e.g., Admin Key)">
+            </div>
+            <button class="btn btn-primary" onclick="generateKey()">Generate Key</button>
+        </div>
+
+        <div class="card">
+            <h2>Active Keys</h2>
+            <div id="keysList">
+                <p style="text-align: center; color: #888;">No active keys</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Broadcast to All Users</h2>
+            <div id="broadcastMessage" class="message hidden"></div>
+            <div class="form-group">
+                <label>Duration (seconds)</label>
+                <input type="number" id="broadcastDuration" value="10" min="1" max="300">
+            </div>
+            <button class="btn btn-primary" onclick="broadcastOvosh()">Broadcast Ovosh</button>
+        </div>
+
+        <div class="card">
+            <h2>Delete Key</h2>
+            <div id="deleteMessage" class="message hidden"></div>
+            <div class="form-group">
+                <label>Key to Delete</label>
+                <input type="text" id="deleteKeyInput" placeholder="Enter key to delete">
+            </div>
+            <button class="btn btn-danger" onclick="deleteKey()">Delete Key</button>
+        </div>
+    </div>
+
+    <script>
+        // Update server status
+        async function updateStatus() {
+            try {
+                const response = await fetch('/status');
+                const data = await response.json();
+                
+                const statusEl = document.getElementById('serverStatus');
+                const broadcastInfoEl = document.getElementById('broadcastInfo');
+                
+                if (data.isActive) {
+                    statusEl.className = 'status active';
+                    statusEl.textContent = 'Server is online - Active Broadcast';
+                    broadcastInfoEl.classList.remove('hidden');
+                    document.getElementById('broadcastDuration').textContent = 
+                        `Duration: ${data.activeBroadcast.duration / 1000} seconds`;
+                    updateTimer(data.remainingTime);
+                } else {
+                    statusEl.className = 'status inactive';
+                    statusEl.textContent = 'Server is online - No active broadcast';
+                    broadcastInfoEl.classList.add('hidden');
+                }
+            } catch (err) {
+                const statusEl = document.getElementById('serverStatus');
+                statusEl.className = 'status inactive';
+                statusEl.textContent = 'Server is offline';
+            }
+        }
+
+        // Update broadcast timer
+        function updateTimer(ms) {
+            if (ms <= 0) return;
+            
+            const seconds = Math.ceil(ms / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            
+            document.getElementById('broadcastTimer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            
+            setTimeout(() => updateTimer(ms - 1000), 1000);
+        }
+
+        // Generate new key
+        async function generateKey() {
+            const name = document.getElementById('keyName').value;
+            const messageEl = document.getElementById('generateMessage');
+            
+            try {
+                const response = await fetch('/generate-key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    messageEl.className = 'message success';
+                    messageEl.textContent = `Key generated successfully: ${data.key}`;
+                    document.getElementById('keyName').value = '';
+                    loadKeys();
+                } else {
+                    messageEl.className = 'message error';
+                    messageEl.textContent = `Error: ${data.error}`;
+                }
+                messageEl.classList.remove('hidden');
+            } catch (err) {
+                messageEl.className = 'message error';
+                messageEl.textContent = `Connection error: ${err.message}`;
+                messageEl.classList.remove('hidden');
+            }
+        }
+
+        // Load keys
+        async function loadKeys() {
+            try {
+                const response = await fetch('/keys');
+                const data = await response.json();
+                
+                const listEl = document.getElementById('keysList');
+                
+                if (data.keys.length === 0) {
+                    listEl.innerHTML = '<p style="text-align: center; color: #888;">No active keys</p>';
+                } else {
+                    listEl.innerHTML = data.keys.map(key => `
+                        <div class="key-item">
+                            <div>
+                                <div class="key-text">${key.key}</div>
+                                <div class="key-meta">Created: ${new Date(key.created).toLocaleString('ru-RU')}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                document.getElementById('keysList').innerHTML = 
+                    '<p style="text-align: center; color: #888;">Failed to load keys</p>';
+            }
+        }
+
+        // Broadcast ovosh
+        async function broadcastOvosh() {
+            const duration = parseInt(document.getElementById('broadcastDuration').value) * 1000;
+            const messageEl = document.getElementById('broadcastMessage');
+            
+            if (isNaN(duration) || duration <= 0) {
+                messageEl.className = 'message error';
+                messageEl.textContent = 'Please enter a valid duration';
+                messageEl.classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/broadcast', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ duration: duration })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    messageEl.className = 'message success';
+                    messageEl.textContent = `Broadcast started for ${data.duration / 1000} seconds!`;
+                } else {
+                    messageEl.className = 'message error';
+                    messageEl.textContent = `Error: ${data.error}`;
+                }
+                messageEl.classList.remove('hidden');
+            } catch (err) {
+                messageEl.className = 'message error';
+                messageEl.textContent = `Connection error: ${err.message}`;
+                messageEl.classList.remove('hidden');
+            }
+        }
+
+        // Delete key
+        async function deleteKey() {
+            const key = document.getElementById('deleteKeyInput').value.trim();
+            const messageEl = document.getElementById('deleteMessage');
+            
+            if (!key) {
+                messageEl.className = 'message error';
+                messageEl.textContent = 'Please enter a key to delete';
+                messageEl.classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/delete-key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: key })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    messageEl.className = 'message success';
+                    messageEl.textContent = 'Key deleted successfully';
+                    document.getElementById('deleteKeyInput').value = '';
+                    loadKeys();
+                } else {
+                    messageEl.className = 'message error';
+                    messageEl.textContent = `Error: ${data.error}`;
+                }
+                messageEl.classList.remove('hidden');
+            } catch (err) {
+                messageEl.className = 'message error';
+                messageEl.textContent = `Connection error: ${err.message}`;
+                messageEl.classList.remove('hidden');
+            }
+        }
+
+        // Auto-refresh status every 2 seconds
+        setInterval(updateStatus, 2000);
+        
+        // Initial load
+        updateStatus();
+        loadKeys();
+    </script>
+</body>
+</html>
