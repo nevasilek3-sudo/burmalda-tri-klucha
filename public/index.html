@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ovosh Server Control Panel</title>
+    <title>Mytheria - Welcome Back!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,366 +15,578 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        h1 {
+            font-family: 'Inter', sans-serif;
+            background: black;
             color: white;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            overflow-x: hidden;
         }
 
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        /* Background Video */
+        .video-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
         }
 
-        .card h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
+        /* Bottom Blur Overlay */
+        .blur-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(60px);
+            -webkit-backdrop-filter: blur(60px);
+            mask-image: linear-gradient(to top, black 0%, transparent 45%);
+            -webkit-mask-image: linear-gradient(to top, black 0%, transparent 45%);
+            pointer-events: none;
+            z-index: 1;
         }
 
-        .form-group {
-            margin-bottom: 15px;
+        /* Liquid Glass Class */
+        .liquid-glass {
+            background: rgba(255, 255, 255, 0.01);
+            background-blend-mode: luminosity;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: none;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
+        .liquid-glass::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1.4px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        /* Blur Fade Up Animation */
+        @keyframes blurFadeUp {
+            from {
+                opacity: 0;
+                filter: blur(20px);
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                filter: blur(0);
+                transform: translateY(0);
+            }
+        }
+
+        .animate-blur-fade-up {
+            animation: blurFadeUp 1s ease-out forwards;
+            opacity: 0;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem 1.5rem 1.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .navbar {
+                padding: 1.5rem 2rem 1.5rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .navbar {
+                padding: 2rem 3rem 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .navbar {
+                padding: 2.5rem 4.5rem 1.5rem;
+            }
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            height: 2rem;
+        }
+
+        @media (min-width: 640px) {
+            .logo {
+                height: 2.5rem;
+            }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+
+        @media (max-width: 1023px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        .nav-links a {
+            font-size: 0.875rem;
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #d1d5db;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        @media (max-width: 639px) {
+            .nav-buttons {
+                display: none;
+            }
+        }
+
+        .search-btn, .user-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
             font-weight: 500;
         }
 
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+        @media (min-width: 768px) {
+            .search-btn {
+                padding: 0.5rem 1.5rem;
+            }
         }
 
-        .form-group input:focus {
+        .hamburger {
+            display: none;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 9999px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        @media (max-width: 1023px) {
+            .hamburger {
+                display: flex;
+            }
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            position: absolute;
+            top: 72px;
+            left: 0;
+            width: 100%;
+            z-index: 40;
+            background: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid #374151;
+            border-bottom: 1px solid #374151;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+            transform: translateY(-1rem);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .mobile-menu.open {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-menu-links {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-menu-links a {
+            padding: 0.75rem 0.75rem;
+            border-radius: 0.5rem;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .mobile-menu-links a:hover {
+            background: rgba(31, 41, 55, 0.5);
+        }
+
+        .mobile-menu-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-top: 1px solid #374151;
+            margin-top: 0.75rem;
+        }
+
+        @media (min-width: 640px) {
+            .mobile-menu-actions {
+                display: none;
+            }
+        }
+
+        /* Hero Content */
+        .hero {
+            position: relative;
+            z-index: 10;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 0 1rem 2rem;
+            margin-top: 120px;
+        }
+
+        @media (min-width: 640px) {
+            .hero {
+                padding: 0 1.5rem 2rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .hero {
+                padding: 0 3rem 4rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .hero {
+                padding: 0 4.5rem 4rem;
+            }
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .hero-content {
+                flex-direction: row;
+                align-items: flex-end;
+                gap: 2rem;
+            }
+        }
+
+        .hero-left {
+            flex: 1;
+        }
+
+        .hero-right {
+            display: flex;
+            gap: 1rem;
+        }
+
+        @media (max-width: 767px) {
+            .hero-right {
+                justify-content: flex-start;
+            }
+        }
+
+        /* Time Display */
+        .time-display {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .time-display .current-time {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .time-display .total-time {
+            font-size: 0.875rem;
+            color: #9ca3af;
+        }
+
+        /* Title */
+        .title {
+            font-size: 2.25rem;
+            font-weight: 400;
+            letter-spacing: -0.04em;
+            margin-bottom: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .title {
+                font-size: 3.75rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .title {
+                font-size: 4.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .title {
+                font-size: 5.625rem;
+            }
+        }
+
+        /* Description */
+        .description {
+            font-size: 1rem;
+            color: #9ca3af;
+            margin-bottom: 1.5rem;
+            max-width: 2rem;
+        }
+
+        @media (min-width: 640px) {
+            .description {
+                font-size: 1.125rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .description {
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .description {
+                font-size: 1.5rem;
+                max-width: 32rem;
+            }
+        }
+
+        /* CTA Buttons */
+        .cta-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .cta-buttons {
+                gap: 1rem 1.5rem;
+            }
+        }
+
+        .watch-btn {
+            background: white;
+            color: black;
+            border-radius: 9999px;
+            font-weight: 500;
+            padding: 0.625rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            line-height: 1;
+        }
+
+        @media (min-width: 640px) {
+            .watch-btn {
+                padding: 0.75rem 2rem;
+            }
+        }
+
+        .watch-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .duration-btn {
+            border-radius: 9999px;
+            font-weight: 500;
+            padding: 0.625rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            line-height: 1;
+        }
+
+        @media (min-width: 640px) {
+            .duration-btn {
+                padding: 0.75rem 2rem;
+            }
+        }
+
+        .duration-input {
+            width: 80px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 0.25rem 0.5rem;
+            color: white;
+            text-align: center;
+            font-size: 0.875rem;
+        }
+
+        .duration-input:focus {
             outline: none;
             border-color: #667eea;
         }
 
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            width: 100%;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
-        }
-
-        .key-list {
-            list-style: none;
-        }
-
-        .key-item {
-            background: #f8f9fa;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .key-item .key-text {
-            font-family: 'Courier New', monospace;
-            word-break: break-all;
-            color: #333;
-        }
-
-        .key-item .key-meta {
-            font-size: 12px;
-            color: #888;
-        }
-
-        .status {
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        .status.active {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-
-        .status.inactive {
-            background: #e9ecef;
-            color: #6c757d;
-        }
-
-        .broadcast-info {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            margin-top: 15px;
-        }
-
-        .broadcast-info h3 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .broadcast-info .timer {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .message {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .message.info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
-        .hidden {
+        /* Navigation Arrows - Hidden */
+        .nav-arrows {
             display: none;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>>Ovosh Server Control Panel</h1>
+    <!-- Background Video -->
+    <video class="video-bg" autoplay muted loop playsinline>
+        <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4" type="video/mp4">
+    </video>
 
-        <div class="card">
-            <h2>Server Status</h2>
-            <div id="serverStatus" class="status inactive">
-                Server is offline
-            </div>
-            <div id="broadcastInfo" class="broadcast-info hidden">
-                <h3>Active Broadcast</h3>
-                <div class="timer" id="broadcastTimer">00:00</div>
-                <p id="broadcastDuration">Duration: 10 seconds</p>
+    <!-- Bottom Blur Overlay -->
+    <div class="blur-overlay"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <div class="logo liquid-glass animate-blur-fade-up" style="animation-delay: 0ms; padding: 0.5rem 1rem; border-radius: 9999px;">
+                <span style="font-weight: 700; font-size: 1.5rem;">Mytheria</span>
             </div>
         </div>
+    </nav>
 
-        <div class="card">
-            <h2>Generate New Key</h2>
-            <div id="generateMessage" class="message hidden"></div>
-            <div class="form-group">
-                <label>Key Name (optional)</label>
-                <input type="text" id="keyName" placeholder="Enter key name (e.g., Admin Key)">
-            </div>
-            <button class="btn btn-primary" onclick="generateKey()">Generate Key</button>
-        </div>
+    <!-- Hero Content -->
+    <section class="hero">
+        <div class="hero-content">
+            <!-- Left Side -->
+            <div class="hero-left">
+                <!-- Time Display -->
+                <div class="time-display animate-blur-fade-up" style="animation-delay: 300ms;">
+                    <div class="current-time" id="currentTime">00:00:00</div>
+                    <div class="total-time" id="totalTime">Total time on site: 0s</div>
+                </div>
 
-        <div class="card">
-            <h2>Active Keys</h2>
-            <div id="keysList">
-                <p style="text-align: center; color: #888;">No active keys</p>
-            </div>
-        </div>
+                <!-- Title -->
+                <h1 class="title animate-blur-fade-up" style="animation-delay: 400ms;">Welcome back! glad to see you</h1>
 
-        <div class="card">
-            <h2>Broadcast to All Users</h2>
-            <div id="broadcastMessage" class="message hidden"></div>
-            <div class="form-group">
-                <label>Duration (seconds)</label>
-                <input type="number" id="broadcastDuration" value="10" min="1" max="300">
-            </div>
-            <button class="btn btn-primary" onclick="broadcastOvosh()">Broadcast Ovosh</button>
-        </div>
+                <!-- Description -->
+                <p class="description animate-blur-fade-up" style="animation-delay: 500ms;">This site was created for the management of mytheria, namely, a vegetable gardener.</p>
 
-        <div class="card">
-            <h2>Delete Key</h2>
-            <div id="deleteMessage" class="message hidden"></div>
-            <div class="form-group">
-                <label>Key to Delete</label>
-                <input type="text" id="deleteKeyInput" placeholder="Enter key to delete">
+                <!-- CTA Buttons -->
+                <div class="cta-buttons animate-blur-fade-up" style="animation-delay: 600ms;">
+                    <button class="watch-btn liquid-glass" onclick="launchOvosh()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="black" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        Launch
+                    </button>
+                    <button class="duration-btn liquid-glass" onclick="launchOvosh()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <input type="number" id="durationInput" class="duration-input" value="10" min="1" max="300" placeholder="10">
+                        <span style="font-size: 0.875rem;">sec</span>
+                    </button>
+                </div>
             </div>
-            <button class="btn btn-danger" onclick="deleteKey()">Delete Key</button>
+
+            <!-- Right Side - Navigation Arrows (Hidden) -->
+            <div class="hero-right animate-blur-fade-up" style="animation-delay: 800ms;">
+                <!-- Removed: Previous and Next buttons -->
+            </div>
         </div>
-    </div>
+    </section>
 
     <script>
-        // Update server status
-        async function updateStatus() {
-            try {
-                const response = await fetch('/status');
-                const data = await response.json();
-                
-                const statusEl = document.getElementById('serverStatus');
-                const broadcastInfoEl = document.getElementById('broadcastInfo');
-                
-                if (data.isActive) {
-                    statusEl.className = 'status active';
-                    statusEl.textContent = 'Server is online - Active Broadcast';
-                    broadcastInfoEl.classList.remove('hidden');
-                    document.getElementById('broadcastDuration').textContent = 
-                        `Duration: ${data.activeBroadcast.duration / 1000} seconds`;
-                    updateTimer(data.remainingTime);
-                } else {
-                    statusEl.className = 'status inactive';
-                    statusEl.textContent = 'Server is online - No active broadcast';
-                    broadcastInfoEl.classList.add('hidden');
-                }
-            } catch (err) {
-                const statusEl = document.getElementById('serverStatus');
-                statusEl.className = 'status inactive';
-                statusEl.textContent = 'Server is offline';
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const icon = document.getElementById('menuIcon');
+            
+            menu.classList.toggle('open');
+            
+            if (menu.classList.contains('open')) {
+                icon.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>';
+            } else {
+                icon.innerHTML = '<line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>';
             }
         }
 
-        // Update broadcast timer
-        function updateTimer(ms) {
-            if (ms <= 0) return;
-            
-            const seconds = Math.ceil(ms / 1000);
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            
-            document.getElementById('broadcastTimer').textContent = 
-                `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-            
-            setTimeout(() => updateTimer(ms - 1000), 1000);
+        // Time tracking
+        let startTime = Date.now();
+        let totalVisitTime = 0;
+
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
         }
 
-        // Generate new key
-        async function generateKey() {
-            const name = document.getElementById('keyName').value;
-            const messageEl = document.getElementById('generateMessage');
+        // Update total visit time
+        function updateTotalTime() {
+            const currentTime = Date.now();
+            const elapsed = Math.floor((currentTime - startTime) / 1000);
+            totalVisitTime = elapsed;
             
-            try {
-                const response = await fetch('/generate-key', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: name })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    messageEl.className = 'message success';
-                    messageEl.textContent = `Key generated successfully: ${data.key}`;
-                    document.getElementById('keyName').value = '';
-                    loadKeys();
-                } else {
-                    messageEl.className = 'message error';
-                    messageEl.textContent = `Error: ${data.error}`;
-                }
-                messageEl.classList.remove('hidden');
-            } catch (err) {
-                messageEl.className = 'message error';
-                messageEl.textContent = `Connection error: ${err.message}`;
-                messageEl.classList.remove('hidden');
-            }
+            const hours = Math.floor(elapsed / 3600);
+            const minutes = Math.floor((elapsed % 3600) / 60);
+            const seconds = elapsed % 60;
+            
+            let timeString = '';
+            if (hours > 0) timeString += `${hours}h `;
+            if (minutes > 0) timeString += `${minutes}m `;
+            timeString += `${seconds}s`;
+            
+            document.getElementById('totalTime').textContent = `Total time on site: ${timeString}`;
         }
 
-        // Load keys
-        async function loadKeys() {
-            try {
-                const response = await fetch('/keys');
-                const data = await response.json();
-                
-                const listEl = document.getElementById('keysList');
-                
-                if (data.keys.length === 0) {
-                    listEl.innerHTML = '<p style="text-align: center; color: #888;">No active keys</p>';
-                } else {
-                    listEl.innerHTML = data.keys.map(key => `
-                        <div class="key-item">
-                            <div>
-                                <div class="key-text">${key.key}</div>
-                                <div class="key-meta">Created: ${new Date(key.created).toLocaleString('ru-RU')}</div>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            } catch (err) {
-                document.getElementById('keysList').innerHTML = 
-                    '<p style="text-align: center; color: #888;">Failed to load keys</p>';
-            }
-        }
-
-        // Broadcast ovosh
-        async function broadcastOvosh() {
-            const duration = parseInt(document.getElementById('broadcastDuration').value) * 1000;
-            const messageEl = document.getElementById('broadcastMessage');
+        // Launch Ovosh
+        async function launchOvosh() {
+            const durationInput = document.getElementById('durationInput');
+            const duration = parseInt(durationInput.value) * 1000;
             
             if (isNaN(duration) || duration <= 0) {
-                messageEl.className = 'message error';
-                messageEl.textContent = 'Please enter a valid duration';
-                messageEl.classList.remove('hidden');
+                alert('Please enter a valid duration');
                 return;
             }
             
             try {
-                const response = await fetch('/broadcast', {
+                const response = await fetch('https://burmalda-tri-klucha.onrender.com/broadcast', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ duration: duration })
@@ -380,64 +595,20 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    messageEl.className = 'message success';
-                    messageEl.textContent = `Broadcast started for ${data.duration / 1000} seconds!`;
+                    alert(`Broadcast started for ${data.duration / 1000} seconds!`);
                 } else {
-                    messageEl.className = 'message error';
-                    messageEl.textContent = `Error: ${data.error}`;
+                    alert(`Error: ${data.error}`);
                 }
-                messageEl.classList.remove('hidden');
             } catch (err) {
-                messageEl.className = 'message error';
-                messageEl.textContent = `Connection error: ${err.message}`;
-                messageEl.classList.remove('hidden');
+                alert(`Connection error: ${err.message}`);
             }
         }
 
-        // Delete key
-        async function deleteKey() {
-            const key = document.getElementById('deleteKeyInput').value.trim();
-            const messageEl = document.getElementById('deleteMessage');
-            
-            if (!key) {
-                messageEl.className = 'message error';
-                messageEl.textContent = 'Please enter a key to delete';
-                messageEl.classList.remove('hidden');
-                return;
-            }
-            
-            try {
-                const response = await fetch('/delete-key', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ key: key })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    messageEl.className = 'message success';
-                    messageEl.textContent = 'Key deleted successfully';
-                    document.getElementById('deleteKeyInput').value = '';
-                    loadKeys();
-                } else {
-                    messageEl.className = 'message error';
-                    messageEl.textContent = `Error: ${data.error}`;
-                }
-                messageEl.classList.remove('hidden');
-            } catch (err) {
-                messageEl.className = 'message error';
-                messageEl.textContent = `Connection error: ${err.message}`;
-                messageEl.classList.remove('hidden');
-            }
-        }
-
-        // Auto-refresh status every 2 seconds
-        setInterval(updateStatus, 2000);
-        
-        // Initial load
-        updateStatus();
-        loadKeys();
+        // Initialize
+        setInterval(updateTime, 1000);
+        setInterval(updateTotalTime, 1000);
+        updateTime();
+        updateTotalTime();
     </script>
 </body>
 </html>
